@@ -23,13 +23,12 @@ public class User implements UserDetails {
     private String password;
 
     @Transient
-    @NotBlank(message = "Passwords confirmation match")
     private String password2;
 
     private boolean active;
 
     @Email
-    @NotBlank(message = "Passwords should match")
+    @NotBlank(message = "Email can't be empty")
     private String email;
     @Column(name="activation_code")
     private String activationCode;
