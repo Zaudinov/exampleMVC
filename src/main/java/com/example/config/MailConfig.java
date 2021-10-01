@@ -43,4 +43,5 @@ public class MailConfig {
 
         return javaMailSender;
     }
+
 }
