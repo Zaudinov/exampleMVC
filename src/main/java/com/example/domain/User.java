@@ -10,37 +10,41 @@ import java.util.Collection;
 import java.util.Set;
 
 @Entity
-@Table(name="usr")
+@Table(name = "usr")
 public class User implements UserDetails {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-
-    @NotBlank(message = "Username can't be empty")
+    @NotBlank(message = "Username cannot be empty")
     private String username;
-
-    @NotBlank(message = "Password can't be empty")
+    @NotBlank(message = "Password cannot be empty")
     private String password;
-
-    @Transient
-    private String password2;
-
     private boolean active;
 
-    @Email
-    @NotBlank(message = "Email can't be empty")
+    @Email(message = "Email is not correct")
+    @NotBlank(message = "Email cannot be empty")
     private String email;
-    @Column(name="activation_code")
     private String activationCode;
 
     @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
-    @CollectionTable(name = "user_role", joinColumns = @JoinColumn(name="user_id"))
+    @CollectionTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"))
     @Enumerated(EnumType.STRING)
     private Set<Role> roles;
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return getRoles();
+    public boolean isAdmin() {
+        return roles.contains(Role.ADMIN);
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getUsername() {
+        return username;
     }
 
     @Override
@@ -48,9 +52,6 @@ public class User implements UserDetails {
         return true;
     }
 
-    public boolean isAdmin(){
-        return roles.contains(Role.ADMIN);
-    }
     @Override
     public boolean isAccountNonLocked() {
         return true;
@@ -66,20 +67,13 @@ public class User implements UserDetails {
         return isActive();
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return getRoles();
     }
 
     public String getPassword() {
@@ -120,13 +114,5 @@ public class User implements UserDetails {
 
     public void setActivationCode(String activationCode) {
         this.activationCode = activationCode;
-    }
-
-    public String getPassword2() {
-        return password2;
-    }
-
-    public void setPassword2(String password2) {
-        this.password2 = password2;
     }
 }

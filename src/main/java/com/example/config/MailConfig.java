@@ -29,19 +29,19 @@ public class MailConfig {
     private String debug;
 
     @Bean
-    public JavaMailSender getMailSender(){
-        JavaMailSenderImpl javaMailSender = new JavaMailSenderImpl();
+    public JavaMailSender getMailSender() {
+        JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
 
-        javaMailSender.setHost(host);
-        javaMailSender.setPort(port);
-        javaMailSender.setUsername(username);
-        javaMailSender.setPassword(password);
+        mailSender.setHost(host);
+        mailSender.setPort(port);
+        mailSender.setUsername(username);
+        mailSender.setPassword(password);
 
-        Properties properties = javaMailSender.getJavaMailProperties();
+        Properties properties = mailSender.getJavaMailProperties();
+
         properties.setProperty("mail.transport.protocol", protocol);
         properties.setProperty("mail.debug", debug);
 
-        return javaMailSender;
+        return mailSender;
     }
-
 }

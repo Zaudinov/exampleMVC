@@ -4,47 +4,36 @@ import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
-
 
 @Entity
-@Table(name="message")
 public class Message {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
 
     @NotBlank(message = "Please fill the message")
-    @Length(max = 2048, message = "Message is too long (more than 2 kB)")
+    @Length(max = 2048, message = "Message too long (more than 2kB)")
     private String text;
-    @Length(max = 255, message = "Tag is too long (more than 255)")
+    @Length(max = 255, message = "Message too long (more than 255)")
     private String tag;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name="user_id")
+    @JoinColumn(name = "user_id")
     private User author;
 
-    private  String filename;
+    private String filename;
 
     public Message() {
     }
 
     public Message(String text, String tag, User user) {
+        this.author = user;
         this.text = text;
         this.tag = tag;
-        this.author = user;
     }
 
-    public String getFilename() {
-        return filename;
-    }
-
-    public void setFilename(String filename) {
-        this.filename = filename;
-    }
-
-    public String getAuthorName(){
-        return author !=null? author.getUsername() : "<none>";
+    public String getAuthorName() {
+        return author != null ? author.getUsername() : "<none>";
     }
 
     public User getAuthor() {
@@ -55,6 +44,14 @@ public class Message {
         this.author = author;
     }
 
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    public String getText() {
+        return text;
+    }
+
     public Long getId() {
         return id;
     }
@@ -63,19 +60,19 @@ public class Message {
         this.id = id;
     }
 
-    public String getText() {
-        return text;
-    }
-
-    public void setText(String text) {
-        this.text = text;
-    }
-
     public String getTag() {
         return tag;
     }
 
     public void setTag(String tag) {
         this.tag = tag;
+    }
+
+    public String getFilename() {
+        return filename;
+    }
+
+    public void setFilename(String filename) {
+        this.filename = filename;
     }
 }

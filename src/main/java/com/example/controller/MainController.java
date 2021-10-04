@@ -1,5 +1,6 @@
 package com.example.controller;
 
+
 import com.example.domain.Message;
 import com.example.domain.User;
 import com.example.repos.MessageRepo;
@@ -34,36 +35,37 @@ public class MainController {
     }
 
     @GetMapping("/main")
-    public String main(@RequestParam(required = false, defaultValue = "") String filter,
-            Model model){
+    public String main(@RequestParam(required = false, defaultValue = "") String filter, Model model) {
         Iterable<Message> messages = messageRepo.findAll();
 
-        if (filter != null && !filter.isEmpty()){
+        if (filter != null && !filter.isEmpty()) {
             messages = messageRepo.findByTag(filter);
-
-        }else
+        } else {
             messages = messageRepo.findAll();
+        }
 
-        model.addAttribute("messages",messages);
+        model.addAttribute("messages", messages);
         model.addAttribute("filter", filter);
+
         return "main";
     }
 
     @PostMapping("/main")
-    public String add(@AuthenticationPrincipal User user,
-                      @Valid Message message,
-                      BindingResult bindingResult,
-                      Model model,
-                      @RequestParam("file") MultipartFile file
+    public String add(
+            @AuthenticationPrincipal User user,
+            @Valid Message message,
+            BindingResult bindingResult,
+            Model model,
+            @RequestParam("file") MultipartFile file
     ) throws IOException {
         message.setAuthor(user);
 
-        if (bindingResult.hasErrors()){
+        if (bindingResult.hasErrors()) {
             Map<String, String> errorsMap = ControllerUtils.getErrors(bindingResult);
 
             model.mergeAttributes(errorsMap);
             model.addAttribute("message", message);
-        }else {
+        } else {
             if (file != null && !file.getOriginalFilename().isEmpty()) {
                 File uploadDir = new File(uploadPath);
 
@@ -75,23 +77,19 @@ public class MainController {
                 String resultFilename = uuidFile + "." + file.getOriginalFilename();
 
                 file.transferTo(new File(uploadPath + "/" + resultFilename));
+
                 message.setFilename(resultFilename);
             }
+
             model.addAttribute("message", null);
+
             messageRepo.save(message);
         }
 
         Iterable<Message> messages = messageRepo.findAll();
-        model.addAttribute("messages",messages);
+
+        model.addAttribute("messages", messages);
 
         return "main";
     }
-
-
-    @GetMapping("/login")
-    public String login(){
-        return "login";
-    }
-
 }
-

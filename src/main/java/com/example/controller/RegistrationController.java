@@ -3,18 +3,18 @@ package com.example.controller;
 import com.example.domain.User;
 import com.example.domain.dto.CaptchaResponseDto;
 import com.example.service.UserService;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.RestTemplate;
-
 
 import javax.validation.Valid;
 import java.util.Collections;
@@ -25,62 +25,71 @@ public class RegistrationController {
     private final static String CAPTCHA_URL = "https://www.google.com/recaptcha/api/siteverify?secret=%s&response=%s";
 
     @Autowired
-    private UserService userService;
+    private UserService userSevice;
+
+    @Value("${recaptcha.secret}")
+    private String secret;
 
     @Autowired
     private RestTemplate restTemplate;
 
-    @Value("${captcha.secret}")
-    String captchaSecret;
-
     @GetMapping("/registration")
-    public String registration(){
+    public String registration() {
         return "registration";
     }
 
     @PostMapping("/registration")
-    public String addUser(@RequestParam("g-recaptcha-response") String captchaResponse,
-                          @Valid User user,
-                          BindingResult bindingResult,
-                          Model model){
-        String url = String.format(CAPTCHA_URL, captchaSecret, captchaResponse);
+    public String addUser(
+            @RequestParam("password2") String passwordConfirm,
+            @RequestParam("g-recaptcha-response") String captchaResponce,
+            @Valid User user,
+            BindingResult bindingResult,
+            Model model
+    ) {
+        String url = String.format(CAPTCHA_URL, secret, captchaResponce);
+        CaptchaResponseDto response = restTemplate.postForObject(url, Collections.emptyList(), CaptchaResponseDto.class);
 
-        CaptchaResponseDto response =
-                restTemplate.postForObject(url, Collections.emptyList(), CaptchaResponseDto.class);
-
-        if(!response.isSuccess()){
+        if (!response.isSuccess()) {
             model.addAttribute("captchaError", "Fill captcha");
         }
-        if (user.getPassword() != null && !user.getPassword().equals(user.getPassword2())){
-            model.addAttribute("passwordError", "Passwords are different or empty!");
+
+        boolean isConfirmEmpty = StringUtils.isEmpty(passwordConfirm);
+
+        if (isConfirmEmpty) {
+            model.addAttribute("password2Error", "Password confirmation cannot be empty");
         }
 
-        if(bindingResult.hasErrors() || !response.isSuccess()){
-            Map<String, String> errorsMap = ControllerUtils.getErrors(bindingResult);
-            model.mergeAttributes(errorsMap);
-
-            return  "registration";
+        if (user.getPassword() != null && !user.getPassword().equals(passwordConfirm)) {
+            model.addAttribute("passwordError", "Passwords are different!");
         }
 
-        if(!userService.addUser(user)){
-            model.addAttribute("usernameError", "User exists!");
+        if (isConfirmEmpty || bindingResult.hasErrors() || !response.isSuccess()) {
+            Map<String, String> errors = ControllerUtils.getErrors(bindingResult);
+
+            model.mergeAttributes(errors);
+
             return "registration";
         }
 
+        if (!userSevice.addUser(user)) {
+            model.addAttribute("usernameError", "User exists!");
+            return "registration";
+        }
 
         return "redirect:/login";
     }
 
     @GetMapping("/activate/{code}")
-    public String activate(@PathVariable String code, Model model){
-        boolean isActivated = userService.activateUser(code);
+    public String activate(Model model, @PathVariable String code) {
+        boolean isActivated = userSevice.activateUser(code);
 
-        if(isActivated){
+        if (isActivated) {
             model.addAttribute("messageType", "success");
-            model.addAttribute("message", "User successfully activated");}
-        else{
+            model.addAttribute("message", "User successfully activated");
+        } else {
             model.addAttribute("messageType", "danger");
-            model.addAttribute("message", "Activation code not found!");}
+            model.addAttribute("message", "Activation code is not found!");
+        }
 
         return "login";
     }
