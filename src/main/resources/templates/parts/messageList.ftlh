@@ -10,16 +10,17 @@
                 <i>#${message.tag}</i>
             </div>
             <div class="card-footer text-muted">
-                <a href="/user-messages/${message.author.id}">${message.authorName}</a>
+                <a class="m-1" href="/user-messages/${message.author.id}">${message.authorName}</a>
                 <#if message.author.id == currentUserId>
-                    <a href="/user-messages/${message.author.id}?message=${message.id}"
-                    class="btn btn-primary">
+                    <a style="display:inline;" href="/user-messages/${message.author.id}?message=${message.id}"
+                       class="btn btn-primary">
                         Edit
                     </a>
-                    <form method="POST" action="/user-messages/${message.author.id}?message=${message.id}">
+
+                    <form style="display:inline;" class="m-1" method="POST" action="/user-messages/${message.author.id}?message=${message.id}">
                         <input type="hidden" name="_method" value="DELETE"/>
                         <input type="hidden" name="_csrf" value="${_csrf.token}" />
-                        <input type="submit" class="btn btn-danger" value="Delete"/>
+                        <button type="submit" class="btn btn-danger">Delete</button>
                     </form>
                 </#if>
             </div>
