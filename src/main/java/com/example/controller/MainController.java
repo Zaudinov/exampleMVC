@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +23,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @Controller
+@Transactional
 public class MainController {
     @Autowired
     private MessageRepo messageRepo;
@@ -142,6 +144,7 @@ public class MainController {
         return "redirect:/user-messages/" + user;
     }
 
+
     @DeleteMapping("user-messages/{user}")
     public String deleteMessage(
             @AuthenticationPrincipal User currentUser,
@@ -149,7 +152,7 @@ public class MainController {
             @RequestParam("message") Long messageId
 
     ) {
-        messageRepo.deleteById(messageId);
+        messageRepo.deleteMessageById(messageId);
 
         return "redirect:/user-messages/" + user;
     }
