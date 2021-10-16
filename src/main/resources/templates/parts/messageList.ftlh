@@ -16,6 +16,11 @@
                     class="btn btn-primary">
                         Edit
                     </a>
+                    <form method="POST" action="/user-messages/${message.author.id}?message=${message.id}">
+                        <input type="hidden" name="_method" value="DELETE"/>
+                        <input type="hidden" name="_csrf" value="${_csrf.token}" />
+                        <input type="submit" class="btn btn-danger" value="Delete"/>
+                    </form>
                 </#if>
             </div>
         </div>

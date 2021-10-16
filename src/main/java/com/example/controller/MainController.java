@@ -4,16 +4,14 @@ package com.example.controller;
 import com.example.domain.Message;
 import com.example.domain.User;
 import com.example.repos.MessageRepo;
+import com.example.repos.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
@@ -27,6 +25,7 @@ import java.util.UUID;
 public class MainController {
     @Autowired
     private MessageRepo messageRepo;
+
 
     @Value("${upload.path}")
     private String uploadPath;
@@ -121,11 +120,15 @@ public class MainController {
     public String updateMessage(
         @AuthenticationPrincipal User currentUser,
         @PathVariable Long user,
-        @RequestParam("id") Message message,
+        @RequestParam(required = false, name = "id") Message message,
         @RequestParam("text") String text,
         @RequestParam("tag") String tag,
         @RequestParam("file") MultipartFile file
+
     ) throws IOException {
+        if(message == null){
+            return "redirect:/main";
+        }
         if(message.getAuthor().equals(currentUser)){
             if(!text.isEmpty() && text != null){
                 message.setText(text);
@@ -136,6 +139,18 @@ public class MainController {
             saveFile(message, file);
             messageRepo.save(message);
         }
+        return "redirect:/user-messages/" + user;
+    }
+
+    @DeleteMapping("user-messages/{user}")
+    public String deleteMessage(
+            @AuthenticationPrincipal User currentUser,
+            @PathVariable Long user,
+            @RequestParam("message") Long messageId
+
+    ) {
+        messageRepo.deleteById(messageId);
+
         return "redirect:/user-messages/" + user;
     }
 }
