@@ -18,7 +18,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.xpath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -75,5 +75,20 @@ public class MainControllerTest {
                         .string("adding file to post"))
                 .andExpect(xpath("//div[@id='messageList']/div[@data-id='10']/div/i")
                 .string("#file test"));
+    }
+
+    @Test
+    public void deleteMessageTest() throws Exception{
+        mockMvc.perform(delete("/user-messages/{user}", "2").param("message", "3").with(csrf()))
+                .andDo(print())
+                .andExpect(authenticated())
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/user-messages/2"));
+
+
+        mockMvc.perform(get("/user-messages/{user}", "2"))
+                .andDo(print())
+                .andExpect(authenticated())
+                .andExpect(xpath("//div[@id='messageList']/div").nodeCount(1));
     }
 }
