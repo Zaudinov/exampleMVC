@@ -57,7 +57,7 @@ public class UserService implements UserDetailsService {
     }
 
     private void sendMessage(User user) {
-        if (!StringUtils.isEmpty(user.getEmail())) {
+        if (!user.getEmail().isEmpty() && user.getEmail() != null) {
             String message = String.format(
                     "Hello, %s! \n" +
                             "Welcome to Sweater. Please, visit next link: http://localhost:8080/activate/%s",
@@ -114,12 +114,12 @@ public class UserService implements UserDetailsService {
         if (isEmailChanged) {
             user.setEmail(email);
 
-            if (!StringUtils.isEmpty(email)) {
+            if (!email.isEmpty() && email != null) {
                 user.setActivationCode(UUID.randomUUID().toString());
             }
         }
 
-        if (!StringUtils.isEmpty(password)) {
+        if (!password.isEmpty() && password != null) {
             user.setPassword(password);
         }
 
